@@ -1,0 +1,203 @@
+---
+import '../styles/global.css';
+import {
+  SITE_URL,
+  AFFILIATE_URL,
+  type Locale,
+} from '../config/site';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import StickyMobileCTA from '../components/StickyMobileCTA.astro';
+
+interface Props {
+  locale: Locale;
+  title: string;
+  description: string;
+  canonicalPath: string;
+  keywords?: string;
+  ogType?: 'website' | 'article';
+  article?: { publishedTime?: string; modifiedTime?: string };
+  newsArticle?: {
+    headline: string;
+    description: string;
+    datePublished: string;
+    dateModified: string;
+    url: string;
+  };
+  faqItems?: { question: string; answer: string }[];
+  breadcrumbs?: { name: string; path: string }[];
+  reviewSchema?: {
+    ratingValue: string;
+    bestRating: string;
+    ratingCount: string;
+    author: string;
+  };
+}
+
+const {
+  locale,
+  title,
+  description,
+  canonicalPath,
+  keywords,
+  ogType = 'website',
+  article,
+  newsArticle,
+  faqItems = [],
+  breadcrumbs = [],
+  reviewSchema,
+} = Astro.props;
+
+const canonical = `${SITE_URL}/${locale}${canonicalPath === '/' ? '/' : canonicalPath}`;
+const pathEn =
+  canonicalPath === '/' ? '/' : canonicalPath;
+const alternates = [
+  { hreflang: 'ru', href: `${SITE_URL}/ru${pathEn === '/' ? '/' : pathEn}` },
+  { hreflang: 'en', href: `${SITE_URL}/en${pathEn === '/' ? '/' : pathEn}` },
+  { hreflang: 'x-default', href: `${SITE_URL}/ru${pathEn === '/' ? '/' : pathEn}` },
+];
+
+const faqSchema =
+  faqItems.length > 0
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: faqItems.map((item) => ({
+          '@type': 'Question',
+          name: item.question,
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: item.answer,
+          },
+        })),
+      }
+    : null;
+
+const breadcrumbSchema =
+  breadcrumbs.length > 0
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: breadcrumbs.map((b, i) => ({
+          '@type': 'ListItem',
+          position: i + 1,
+          name: b.name,
+          item: `${SITE_URL}/${locale}${b.path === '/' ? '/' : b.path}`,
+        })),
+      }
+    : null;
+
+const newsArticleJsonLd = newsArticle
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'NewsArticle',
+      headline: newsArticle.headline,
+      description: newsArticle.description,
+      datePublished: newsArticle.datePublished,
+      dateModified: newsArticle.dateModified,
+      mainEntityOfPage: {
+        '@type': 'WebPage',
+        '@id': newsArticle.url,
+      },
+      author: {
+        '@type': 'Organization',
+        name: 'Astronaut Media Desk',
+      },
+      publisher: {
+        '@type': 'Organization',
+        name: 'Astronaut @ 1win',
+      },
+    }
+  : null;
+
+const reviewJsonLd = reviewSchema
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: 'Astronaut crash game at 1win',
+      description:
+        locale === 'ru'
+          ? 'Обзор игрового опыта Astronaut: механика crash, выплаты и бонусы 1win.'
+          : 'Editorial overview of Astronaut crash gameplay, payouts, and 1win bonuses.',
+      review: {
+        '@type': 'Review',
+        author: { '@type': 'Person', name: reviewSchema.author },
+        reviewRating: {
+          '@type': 'Rating',
+          ratingValue: reviewSchema.ratingValue,
+          bestRating: reviewSchema.bestRating,
+        },
+        reviewBody:
+          locale === 'ru'
+            ? 'Сводка редакции по стабильности раундов, прозрачности правил и пользовательскому опыту.'
+            : 'Editorial summary focusing on round pacing, rule clarity, and UX signals.',
+      },
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: reviewSchema.ratingValue,
+        bestRating: reviewSchema.bestRating,
+        ratingCount: reviewSchema.ratingCount,
+      },
+    }
+  : null;
+
+const structured = [
+  faqSchema,
+  breadcrumbSchema,
+  reviewJsonLd,
+  newsArticleJsonLd,
+].filter(Boolean);
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {keywords && <meta name="keywords" content={keywords} />}
+    <link rel="canonical" href={canonical} />
+    {alternates.map((a) => (
+      <link rel="alternate" hreflang={a.hreflang} href={a.href} />
+    ))}
+    <meta property="og:site_name" content="Astronaut @ 1win" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:locale" content={locale === 'ru' ? 'ru_RU' : 'en_US'} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    {article?.publishedTime && (
+      <meta property="article:published_time" content={article.publishedTime} />
+    )}
+    {article?.modifiedTime && (
+      <meta property="article:modified_time" content={article.modifiedTime} />
+    )}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Syne:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    {structured.map((json) => (
+      <script type="application/ld+json" set:html={JSON.stringify(json)} />
+    ))}
+  </head>
+  <body>
+    <div class="space-bg" aria-hidden="true">
+      <div class="stars"></div>
+      <div class="particles"></div>
+      <div class="cloud"></div>
+    </div>
+    <Header locale={locale} affiliateUrl={AFFILIATE_URL} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer locale={locale} affiliateUrl={AFFILIATE_URL} />
+    <StickyMobileCTA locale={locale} affiliateUrl={AFFILIATE_URL} />
+  </body>
+</html>

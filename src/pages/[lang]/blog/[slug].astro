@@ -1,0 +1,99 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PageSections from '../../../components/PageSections.astro';
+import {
+  AFFILIATE_URL,
+  BLOG_SLUGS,
+  LOCALES,
+  SITE_URL,
+  type BlogSlug,
+  type Locale,
+} from '../../../config/site';
+import { getBlogPage } from '../../../data/registry';
+import { renderBlogRelatedAside } from '../../../data/renderRelated';
+import { t } from '../../../i18n/ui';
+
+export function getStaticPaths() {
+  return LOCALES.flatMap((lang) =>
+    BLOG_SLUGS.map((slug) => ({ params: { lang, slug } })),
+  );
+}
+
+const { lang, slug } = Astro.params;
+const locale = lang as Locale;
+const key = slug as BlogSlug;
+const page = getBlogPage(locale, key);
+if (!page) throw new Error(`Missing blog: ${slug}`);
+
+const L = t(locale);
+const canonicalPath = `/blog/${key}/`;
+const relatedHtml = renderBlogRelatedAside(locale, key);
+const url = `${SITE_URL}/${locale}/blog/${key}/`;
+const crumbs = [
+  { name: locale === 'ru' ? 'Главная' : 'Home', path: '/' },
+  { name: locale === 'ru' ? 'Блог' : 'Blog', path: '/blog/' },
+  { name: page.h1, path: canonicalPath },
+];
+---
+
+<BaseLayout
+  locale={locale}
+  title={page.title}
+  description={page.description}
+  canonicalPath={canonicalPath}
+  keywords={page.keywords}
+  ogType="article"
+  article={{
+    publishedTime: page.datePublished,
+    modifiedTime: page.dateModified,
+  }}
+  newsArticle={{
+    headline: page.h1,
+    description: page.description,
+    datePublished: page.datePublished,
+    dateModified: page.dateModified,
+    url,
+  }}
+  faqItems={page.faq}
+  breadcrumbs={crumbs}
+>
+  <div class="wrap page-head">
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+      {
+        crumbs.map((c, i) => (
+          <>
+            {i > 0 && <span aria-hidden="true"> / </span>}
+            <a href={`/${locale}${c.path}`}>{c.name}</a>
+          </>
+        ))
+      }
+    </nav>
+    <p style="color:var(--muted);font-size:0.9rem;margin:0">
+      {page.datePublished}
+      {page.dateModified !== page.datePublished && (
+        <> · Updated {page.dateModified}</>
+      )}
+    </p>
+    <h1>{page.h1}</h1>
+    {page.lead && <p class="page-lead">{page.lead}</p>}
+    <div class="page-ctas">
+      <a
+        class="btn btn-primary"
+        href={AFFILIATE_URL}
+        rel="nofollow sponsored noopener"
+        target="_blank">{L.ctaPlay}</a>
+      <a
+        class="btn btn-secondary"
+        href={AFFILIATE_URL}
+        rel="nofollow sponsored noopener"
+        target="_blank">{L.ctaBonus}</a>
+    </div>
+  </div>
+  <PageSections
+    locale={locale}
+    affiliateUrl={AFFILIATE_URL}
+    sections={page.sections}
+    faq={page.faq}
+    relatedHtml={relatedHtml}
+  />
+</BaseLayout>

@@ -1,0 +1,76 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { BLOG_SLUGS, LOCALES, type Locale } from '../../../config/site';
+import { getBlogPage } from '../../../data/registry';
+import { t } from '../../../i18n/ui';
+
+export function getStaticPaths() {
+  return LOCALES.map((lang) => ({ params: { lang } }));
+}
+
+const { lang } = Astro.params;
+const locale = lang as Locale;
+const L = t(locale);
+
+const posts = BLOG_SLUGS.map((slug) => {
+  const p = getBlogPage(locale, slug);
+  if (!p) return null;
+  return { slug, title: p.title, description: p.description, date: p.datePublished };
+}).filter(Boolean) as {
+  slug: string;
+  title: string;
+  description: string;
+  date: string;
+}[];
+
+const title =
+  locale === 'ru'
+    ? 'Блог про Astronaut — стратегии, демо и crash-гайды'
+    : 'Astronaut blog — strategies, demos, and crash guides';
+const description =
+  locale === 'ru'
+    ? 'Длинные материалы про Astronaut: стратегии, демо, мобильный опыт, реальные деньги и обзор 1win.'
+    : 'Long-form Astronaut articles: strategy, demo play, mobile tips, real money notes, and 1win context.';
+---
+
+<BaseLayout
+  locale={locale}
+  title={title}
+  description={description}
+  canonicalPath="/blog/"
+  keywords={
+    locale === 'ru'
+      ? 'astronaut стратегия, astronaut demo, crash game, astronaut отзывы'
+      : 'astronaut strategy, astronaut demo, crash game, astronaut reviews'
+  }
+  breadcrumbs={[
+    { name: locale === 'ru' ? 'Главная' : 'Home', path: '/' },
+    { name: locale === 'ru' ? 'Блог' : 'Blog', path: '/blog/' },
+  ]}
+>
+  <section class="wrap page-head">
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+      <a href={`/${locale}/`}>{locale === 'ru' ? 'Главная' : 'Home'}</a>
+      <span aria-hidden="true"> / </span>
+      <span>{locale === 'ru' ? 'Блог' : 'Blog'}</span>
+    </nav>
+    <h1>{L.blogIndexTitle}</h1>
+    <p class="page-lead">{L.blogIndexLead}</p>
+  </section>
+  <div class="wrap prose" style="padding-top:0">
+    <ul class="blog-list">
+      {
+        posts.map((p) => (
+          <li>
+            <a href={`/${locale}/blog/${p.slug}/`}>
+              <strong>{p.title}</strong>
+              <span>
+                {p.date} — {p.description}
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</BaseLayout>

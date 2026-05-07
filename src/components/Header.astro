@@ -1,0 +1,74 @@
+---
+import type { Locale } from '../config/site';
+import { navItems, t } from '../i18n/ui';
+
+interface Props {
+  locale: Locale;
+  affiliateUrl: string;
+}
+
+const { locale, affiliateUrl } = Astro.props;
+const labels = t(locale);
+---
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href={`/${locale}/`}>
+      <span class="logo-mark" aria-hidden="true">🚀</span>
+      <span>Astronaut <span style="color:var(--muted);font-weight:600">× 1win</span></span>
+    </a>
+    <nav class="nav-desktop" aria-label="Main">
+      {
+        navItems.map((item) => {
+          const href =
+            item.slug === '' ? `/${locale}/` : `/${locale}/${item.slug}/`;
+          return (
+            <a href={href}>{item.label[locale]}</a>
+          );
+        })
+      }
+    </nav>
+    <div class="lang-switch" aria-label={labels.langLabel}>
+      <a href={Astro.url.pathname.replace(/^\/(en|ru)/, '/ru')} aria-current={locale === 'ru' ? 'true' : undefined}>RU</a>
+      <span style="color:var(--stroke)">|</span>
+      <a href={Astro.url.pathname.replace(/^\/(en|ru)/, '/en')} aria-current={locale === 'en' ? 'true' : undefined}>EN</a>
+    </div>
+    <button
+      type="button"
+      class="burger"
+      aria-expanded="false"
+      aria-controls="mobile-nav"
+      aria-label={labels.openMenu}
+      id="burger-btn"
+    >
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+<div class="mobile-panel" id="mobile-nav" role="dialog" aria-label={labels.openMenu}>
+  {
+    navItems.map((item) => {
+      const href =
+        item.slug === '' ? `/${locale}/` : `/${locale}/${item.slug}/`;
+      return <a href={href}>{item.label[locale]}</a>;
+    })
+  }
+  <div class="mobile-lang">
+    <a class="btn btn-secondary btn-block" href={affiliateUrl} rel="nofollow sponsored noopener" target="_blank">{labels.ctaPlay}</a>
+    <a class="btn btn-primary btn-block" href={affiliateUrl} rel="nofollow sponsored noopener" target="_blank">{labels.ctaBonus}</a>
+  </div>
+</div>
+<script>
+  const btn = document.getElementById('burger-btn');
+  const panel = document.getElementById('mobile-nav');
+  btn?.addEventListener('click', () => {
+    const open = panel?.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  panel?.querySelectorAll('a').forEach((a) => {
+    a.addEventListener('click', () => {
+      panel.classList.remove('open');
+      btn?.setAttribute('aria-expanded', 'false');
+    });
+  });
+</script>

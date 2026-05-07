@@ -1,0 +1,56 @@
+---
+import type { Locale } from '../config/site';
+import type { ContentSection, FAQItem } from '../data/types';
+import { t } from '../i18n/ui';
+
+interface Props {
+  locale: Locale;
+  affiliateUrl: string;
+  sections: ContentSection[];
+  faq: FAQItem[];
+  relatedHtml?: string;
+}
+
+const { locale, affiliateUrl, sections, faq, relatedHtml } = Astro.props;
+const L = t(locale);
+---
+
+<div class="wrap prose">
+  {
+    sections.map((sec, i) => (
+      <div class="section-chunk">
+        <h2>{sec.title}</h2>
+        <div class="prose-block" set:html={sec.html} />
+        {(i + 1) % 2 === 0 && i < sections.length - 1 ? (
+          <div class="mid-cta">
+            <p>{L.midCtaText}</p>
+            <div style="display:flex;flex-wrap:wrap;gap:0.5rem">
+              <a class="btn btn-primary" href={affiliateUrl} rel="nofollow sponsored noopener" target="_blank">
+                {L.ctaPlay}
+              </a>
+              <a class="btn btn-secondary" href={affiliateUrl} rel="nofollow sponsored noopener" target="_blank">
+                {L.ctaBonus}
+              </a>
+            </div>
+          </div>
+        ) : null}
+      </div>
+    ))
+  }
+
+  {
+    faq.length > 0 && (
+      <section class="faq">
+        <h2>{locale === 'ru' ? 'Частые вопросы' : 'Frequently asked questions'}</h2>
+        {faq.map((item) => (
+          <details class="faq-item">
+            <summary>{item.question}</summary>
+            <p>{item.answer}</p>
+          </details>
+        ))}
+      </section>
+    )
+  }
+
+  {relatedHtml ? <div set:html={relatedHtml} /> : null}
+</div>

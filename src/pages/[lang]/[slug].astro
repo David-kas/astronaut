@@ -1,0 +1,79 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageSections from '../../components/PageSections.astro';
+import { getMainPage } from '../../data/registry';
+import { renderRelatedAside } from '../../data/renderRelated';
+import {
+  AFFILIATE_URL,
+  LOCALES,
+  MAIN_SLUGS,
+  type Locale,
+  type MainSlug,
+} from '../../config/site';
+import { t } from '../../i18n/ui';
+
+export function getStaticPaths() {
+  return LOCALES.flatMap((lang) =>
+    MAIN_SLUGS.map((slug) => ({ params: { lang, slug } })),
+  );
+}
+
+const { lang, slug } = Astro.params;
+const locale = lang as Locale;
+const key = slug as MainSlug;
+const page = getMainPage(locale, key);
+if (!page) throw new Error(`Missing page: ${slug}`);
+
+const L = t(locale);
+const canonicalPath = `/${key}/`;
+const relatedHtml = renderRelatedAside(locale, key);
+const crumbs = [
+  { name: locale === 'ru' ? 'Главная' : 'Home', path: '/' },
+  { name: page.h1, path: canonicalPath },
+];
+---
+
+<BaseLayout
+  locale={locale}
+  title={page.title}
+  description={page.description}
+  canonicalPath={canonicalPath}
+  keywords={page.keywords}
+  faqItems={page.faq}
+  breadcrumbs={crumbs}
+  reviewSchema={page.review}
+>
+  <div class="wrap page-head">
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+      {
+        crumbs.map((c, i) => (
+          <>
+            {i > 0 && <span aria-hidden="true"> / </span>}
+            <a href={`/${locale}${c.path}`}>{c.name}</a>
+          </>
+        ))
+      }
+    </nav>
+    <h1>{page.h1}</h1>
+    {page.lead && <p class="page-lead">{page.lead}</p>}
+    <div class="page-ctas">
+      <a
+        class="btn btn-primary"
+        href={AFFILIATE_URL}
+        rel="nofollow sponsored noopener"
+        target="_blank">{L.ctaPlay}</a>
+      <a
+        class="btn btn-secondary"
+        href={AFFILIATE_URL}
+        rel="nofollow sponsored noopener"
+        target="_blank">{L.ctaBonus}</a>
+    </div>
+  </div>
+  <PageSections
+    locale={locale}
+    affiliateUrl={AFFILIATE_URL}
+    sections={page.sections}
+    faq={page.faq}
+    relatedHtml={relatedHtml}
+  />
+</BaseLayout>

@@ -1,0 +1,17 @@
+---
+import type { Locale } from '../config/site';
+import { t } from '../i18n/ui';
+
+interface Props {
+  locale: Locale;
+  affiliateUrl: string;
+}
+
+const { locale, affiliateUrl } = Astro.props;
+const L = t(locale);
+---
+
+<div class="sticky-cta" role="region" aria-label="CTA">
+  <a class="btn btn-primary" href={affiliateUrl} rel="nofollow sponsored noopener" target="_blank">{L.ctaPlay}</a>
+  <a class="btn btn-secondary" href={affiliateUrl} rel="nofollow sponsored noopener" target="_blank">{L.ctaBonus}</a>
+</div>

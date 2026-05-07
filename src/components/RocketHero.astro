@@ -1,0 +1,42 @@
+---
+import type { Locale } from '../config/site';
+import { t } from '../i18n/ui';
+
+interface Props {
+  locale: Locale;
+  affiliateUrl: string;
+  h1: string;
+  lead: string;
+}
+
+const { locale, affiliateUrl, h1, lead } = Astro.props;
+const L = t(locale);
+---
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <h1>{h1}</h1>
+      <p class="hero-lead">{lead}</p>
+      <div class="hero-ctas">
+        <a class="btn btn-primary" href={affiliateUrl} rel="nofollow sponsored noopener" target="_blank">{L.ctaPlay}</a>
+        <a class="btn btn-secondary" href={affiliateUrl} rel="nofollow sponsored noopener" target="_blank">{L.ctaBonus}</a>
+      </div>
+    </div>
+    <div class="rocket-stage" aria-hidden="true">
+      <div class="multiplier-orbit">
+        <span class="mult-tag">×20</span>
+        <span class="mult-tag">×50</span>
+        <span class="mult-tag">×100</span>
+      </div>
+      <div class="rocket">
+        <div class="rocket-body">
+          <div class="rocket-window"></div>
+        </div>
+        <div class="rocket-fin left"></div>
+        <div class="rocket-fin right"></div>
+        <div class="rocket-flame"></div>
+      </div>
+    </div>
+  </div>
+</section>

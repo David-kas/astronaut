@@ -1,0 +1,71 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { LOCALES, type Locale } from '../../config/site';
+
+export function getStaticPaths() {
+  return LOCALES.map((lang) => ({ params: { lang } }));
+}
+
+const { lang } = Astro.params;
+const locale = lang as Locale;
+const title =
+  locale === 'ru'
+    ? 'Условия использования — Astronaut @ 1win'
+    : 'Terms of Use — Astronaut @ 1win';
+const description =
+  locale === 'ru'
+    ? 'Условия использования информационного сайта Astronaut @ 1win.'
+    : 'Terms of use for the informational Astronaut @ 1win site.';
+---
+
+<BaseLayout
+  locale={locale}
+  title={title}
+  description={description}
+  canonicalPath="/terms/"
+  breadcrumbs={[
+    { name: locale === 'ru' ? 'Главная' : 'Home', path: '/' },
+    { name: locale === 'ru' ? 'Условия' : 'Terms', path: '/terms/' },
+  ]}
+>
+  <div class="wrap prose">
+    <h1>{locale === 'ru' ? 'Условия использования' : 'Terms of Use'}</h1>
+    {
+      locale === 'ru' ? (
+        <>
+          <p>
+            Материалы предназначены для лиц 18+. Используя сайт, вы подтверждаете
+            достижение совершеннолетия в вашей юрисдикции и соблюдение местных
+            законов об азартных играх.
+          </p>
+          <p>
+            Мы не являемся оператором казино и не принимаем ставки. Партнёрские
+            ссылки могут генерировать комиссию для владельца сайта. Условия игр,
+            бонусов и выплат определяются оператором.
+          </p>
+          <p>
+            Контент предоставляется «как есть» без гарантий точности или
+            пригодности. Ответственность за решения игрока лежит на игроке.
+          </p>
+        </>
+      ) : (
+        <>
+          <p>
+            Content is intended for adults 18+. By using this site you confirm
+            you meet the legal age in your jurisdiction and comply with local
+            gambling laws.
+          </p>
+          <p>
+            We are not a casino operator and do not accept wagers. Affiliate
+            links may earn a commission. Game, bonus, and payout rules are set by
+            the licensed operator.
+          </p>
+          <p>
+            Information is provided “as is” without warranties of accuracy or
+            fitness. Players remain responsible for their decisions.
+          </p>
+        </>
+      )
+    }
+  </div>
+</BaseLayout>

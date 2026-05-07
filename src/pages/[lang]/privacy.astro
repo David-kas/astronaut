@@ -1,0 +1,72 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { LOCALES, type Locale } from '../../config/site';
+
+export function getStaticPaths() {
+  return LOCALES.map((lang) => ({ params: { lang } }));
+}
+
+const { lang } = Astro.params;
+const locale = lang as Locale;
+const title =
+  locale === 'ru'
+    ? 'Политика конфиденциальности — Astronaut @ 1win'
+    : 'Privacy Policy — Astronaut @ 1win';
+const description =
+  locale === 'ru'
+    ? 'Как обрабатываются данные на информационном сайте Astronaut @ 1win.'
+    : 'How this informational Astronaut @ 1win site handles data.';
+---
+
+<BaseLayout
+  locale={locale}
+  title={title}
+  description={description}
+  canonicalPath="/privacy/"
+  breadcrumbs={[
+    { name: locale === 'ru' ? 'Главная' : 'Home', path: '/' },
+    { name: locale === 'ru' ? 'Конфиденциальность' : 'Privacy', path: '/privacy/' },
+  ]}
+>
+  <div class="wrap prose">
+    <h1>{locale === 'ru' ? 'Политика конфиденциальности' : 'Privacy Policy'}</h1>
+    {
+      locale === 'ru' ? (
+        <>
+          <p>
+            Этот сайт носит информационный характер и может использовать
+            стандартные технические механизмы (например, логи хостинга и
+            аналитику) для обеспечения безопасности и улучшения работы сервиса.
+            Мы не просим персональные данные для доступа к материалам.
+          </p>
+          <p>
+            Партнёрские ссылки могут вести на внешние операторы, включая 1win.
+            Их политики конфиденциальности и cookies применяются отдельно и
+            доступны на соответствующих доменах.
+          </p>
+          <p>
+            Для запросов по данным используйте контактные каналы вашего
+            хостинг-провайдера или владельца домена, указанные в публичных
+            записях WHOIS.
+          </p>
+        </>
+      ) : (
+        <>
+          <p>
+            This informational site may rely on standard technical logging and
+            analytics required for security and performance. We do not require
+            personal data to read editorial content.
+          </p>
+          <p>
+            Affiliate links may route to third-party operators such as 1win.
+            Their privacy policies and cookie rules apply on their own domains.
+          </p>
+          <p>
+            For data requests, use the contacts published by your hosting
+            provider or domain owner in public WHOIS records.
+          </p>
+        </>
+      )
+    }
+  </div>
+</BaseLayout>
